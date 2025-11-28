@@ -1,1 +1,1 @@
-# Lupin-MultiLoader for 1.20.1
+# Dis-Enchanting-Table for 1.20.1
