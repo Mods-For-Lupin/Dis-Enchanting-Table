@@ -1,6 +1,7 @@
 package com.cursee.disenchanting_table.impl.common.block.entity;
 
 import com.cursee.disenchanting_table.impl.common.block.entity.abstr.AbstractContainerBE;
+import com.cursee.disenchanting_table.impl.common.inventory.DisenchantingTableMenu;
 import com.cursee.disenchanting_table.impl.common.registry.ModBlockEntities;
 import com.cursee.disenchanting_table.impl.common.registry.ModMenus;
 import net.minecraft.core.BlockPos;
@@ -35,6 +36,9 @@ public class DisenchantingTableBlockEntity extends AbstractContainerBE implement
 
   @Override
   public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-    return ModMenus.DISENCHANTING_TABLE.create(i, inventory);
+
+    return new DisenchantingTableMenu(i, inventory, this);
+
+    //return ModMenus.DISENCHANTING_TABLE.create(i, inventory);
   }
 }

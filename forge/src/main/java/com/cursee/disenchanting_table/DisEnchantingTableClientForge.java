@@ -12,7 +12,7 @@ public class DisEnchantingTableClientForge {
   public DisEnchantingTableClientForge() {
 
     DisEnchantingTableClient.init();
-    
+
     DisEnchantingTableForge.eventBus.addListener((Consumer<FMLClientSetupEvent>) event -> {
       event.enqueueWork(() -> {
         MenuScreens.register(ModMenus.DISENCHANTING_TABLE, DisenchantingTableScreen::new);
