@@ -1,5 +1,6 @@
 package com.cursee.disenchanting_table;
 
+import com.cursee.disenchanting_table.impl.common.registry.ModBlockEntities;
 import com.cursee.disenchanting_table.impl.common.registry.ModBlocks;
 import com.cursee.disenchanting_table.impl.common.registry.ModItems;
 import com.cursee.disenchanting_table.impl.common.registry.ModTabs;
@@ -29,6 +30,7 @@ public class DisEnchantingTableForge {
     DisEnchantingTableForge.eventBus = context.getModEventBus();
 
     bind(Registries.BLOCK, ModBlocks::register);
+    bind(Registries.BLOCK_ENTITY_TYPE, ModBlockEntities::register);
     bind(Registries.ITEM, ModItems::register);
     bind(Registries.CREATIVE_MODE_TAB, ModTabs::register);
 

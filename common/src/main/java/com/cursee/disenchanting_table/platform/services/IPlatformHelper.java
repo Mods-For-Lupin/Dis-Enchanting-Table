@@ -1,7 +1,13 @@
 package com.cursee.disenchanting_table.platform.services;
 
 import java.nio.file.Path;
+import java.util.function.BiFunction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface IPlatformHelper {
 
@@ -44,4 +50,6 @@ public interface IPlatformHelper {
   }
 
   CreativeModeTab.Builder tabBuilder();
+
+  <T extends BlockEntity> Builder<T> of(BiFunction<BlockPos, BlockState, ? extends T> factory, Block... validBlocks);
 }
