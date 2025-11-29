@@ -3,6 +3,7 @@ package com.cursee.disenchanting_table;
 import com.cursee.disenchanting_table.impl.common.registry.ModBlockEntities;
 import com.cursee.disenchanting_table.impl.common.registry.ModBlocks;
 import com.cursee.disenchanting_table.impl.common.registry.ModItems;
+import com.cursee.disenchanting_table.impl.common.registry.ModMenus;
 import com.cursee.disenchanting_table.impl.common.registry.ModTabs;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -33,6 +34,7 @@ public class DisEnchantingTableForge {
     bind(Registries.BLOCK_ENTITY_TYPE, ModBlockEntities::register);
     bind(Registries.ITEM, ModItems::register);
     bind(Registries.CREATIVE_MODE_TAB, ModTabs::register);
+    bind(Registries.MENU, ModMenus::register);
 
     DisEnchantingTable.init();
 

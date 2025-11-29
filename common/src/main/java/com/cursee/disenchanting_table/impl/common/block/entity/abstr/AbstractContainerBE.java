@@ -1,17 +1,32 @@
 package com.cursee.disenchanting_table.impl.common.block.entity.abstr;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment.Server;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BookItem;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,6 +42,7 @@ public abstract class AbstractContainerBE extends BlockEntity implements Worldly
   private static final int[] SLOTS_FOR_DOWN = new int[]{ENCHANTED_ITEM_SLOT, OUTPUT_SLOT};
   private static final int[] SLOTS_FOR_SIDES = new int[]{ENCHANTED_ITEM_SLOT, NORMAL_BOOK_SLOT};
 
+  public static final Map<Enchantment, Integer> EMPTY_ENCHANTMENTS = EnchantmentHelper.getEnchantments(ItemStack.EMPTY);
 
   private NonNullList<ItemStack> items;
 
@@ -139,5 +155,70 @@ public abstract class AbstractContainerBE extends BlockEntity implements Worldly
     }
 
     return false;
+  }
+
+  protected void doServerTick(Level level, BlockPos pos, BlockState blockState) {
+
+    ItemStack inputStack = this.getItem(ENCHANTED_ITEM_SLOT);
+    ItemStack normalBookStack = this.getItem(NORMAL_BOOK_SLOT);
+    ItemStack outputStack = this.getItem(OUTPUT_SLOT);
+
+    if ((inputStack.isEmpty() || normalBookStack.isEmpty()) || !outputStack.isEmpty()) {
+      return;
+    }
+
+    // gather enchantments from input item
+    LinkedHashMap<Enchantment, Integer> inputItemEnchantments = (LinkedHashMap<Enchantment, Integer>) EnchantmentHelper.getEnchantments(inputStack);
+
+    // disenchant
+    if (!inputStack.is(Items.ENCHANTED_BOOK)) {
+
+      // create a new enchanted book with no enchantments
+      ItemStack returnedBook = new ItemStack(Items.ENCHANTED_BOOK);
+
+      // copy all input enchantments to the book
+      EnchantmentHelper.setEnchantments(inputItemEnchantments, returnedBook);
+
+      // remove all enchantments from the input item
+      EnchantmentHelper.setEnchantments(EMPTY_ENCHANTMENTS, inputStack);
+
+      // decrease normal book count as fuel cost
+      normalBookStack.shrink(1);
+
+      // update slots
+      this.setItem(ENCHANTED_ITEM_SLOT, inputStack);
+      this.setItem(NORMAL_BOOK_SLOT, normalBookStack);
+      this.setItem(OUTPUT_SLOT, returnedBook);
+
+      BlockEntity.setChanged(level, pos, blockState);
+    } else {
+
+      // gather enchantments from input item as ordered keys
+      ArrayList<Enchantment> inputEnchantmentKeys = new ArrayList<>(inputItemEnchantments.keySet());
+
+      // copy the first enchantment
+      Enchantment stolenEnchantment = inputEnchantmentKeys.get(0);
+      Integer stolenEnchantmentLevel = inputItemEnchantments.get(stolenEnchantment);
+
+      // create a new enchanted book with the copied enchantment
+      ItemStack outputEnchantmentBook = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(stolenEnchantment, stolenEnchantmentLevel));
+
+      // remove the copied enchantment from the input map
+      inputItemEnchantments.remove(stolenEnchantment);
+
+      // set input item stack to have updated input enchantments without copied enchantment
+      ItemStack inputEnchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
+      EnchantmentHelper.setEnchantments(inputItemEnchantments, inputEnchantedBook);
+
+      // decrease normal book count as fuel cost
+      normalBookStack.shrink(1);
+
+      // update slots
+      this.setItem(ENCHANTED_ITEM_SLOT, inputEnchantedBook);
+      this.setItem(NORMAL_BOOK_SLOT, normalBookStack);
+      this.setItem(OUTPUT_SLOT, outputEnchantmentBook);
+
+      BlockEntity.setChanged(level, pos, blockState);
+    }
   }
 }
